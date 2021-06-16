@@ -5,8 +5,6 @@ const fetchWrapper = (url, options = {}) => {
     headers: new Headers({'content-type': 'application/json'})
   };
 
-  console.log(url);
-
   return fetch(apiUrl(url), {...defaultOptions, ...options})
     .then((response) =>
       response.json()
