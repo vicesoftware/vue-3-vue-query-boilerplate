@@ -1,13 +1,10 @@
-<script lang="ts">
+<script>
 import { defineComponent } from "vue";
 import { useQuery } from "vue-query";
+import api from "./api";
 
-import { Post } from "./types";
-
-const fetcher = async (id: number): Promise<Post> =>
-  await fetch(`https://jsonplaceholder.typicode.com/posts/${id}`).then(
-    (response) => response.json()
-  );
+const fetcher = async (id) =>
+  await api.get(`posts/${id}`);
 
 export default defineComponent({
   name: "Post",

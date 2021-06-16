@@ -1,20 +1,11 @@
-<script lang="ts">
+<script>
 import { defineComponent } from "vue";
 import { useQuery } from "vue-query";
-import { Post } from "./types";
+import api from "./api";
 
-const apiUrl = url => import.meta.env.VITE_API_URL + url
-
-const fetcher = async (): Promise<Post[]> => {
-  const options = {
-          headers: new Headers({'content-type': 'application/json'})
-  };
-
-  console.log()
-
-  return await fetch(apiUrl("posts"), options).then((response) =>
-    response.json()
-  ).catch(e => console.log("Error fetching posts", e));
+const fetcher = async () => {
+  return await api.get("posts")
+    .catch(e => console.log("Error fetching posts", e));
 }
 
 export default defineComponent({
