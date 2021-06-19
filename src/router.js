@@ -1,7 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
-import Posts from "./Posts.vue";
-import Post from "./Post.vue";
-import About from "./About.vue";
+import { PostList, PostDetails} from "./features/posts";
+import { About } from "./features/about";
 
 const routerHistory = createWebHistory();
 
@@ -9,7 +8,7 @@ const routes = [
   {
     path: "/",
     name: "Posts",
-    component: Posts
+    component: PostList
   },
   {
     path: "/posts/:id",
@@ -19,7 +18,7 @@ const routes = [
         postId: route.params.id
       };
     },
-    component: Post
+    component: PostDetails
   },
   {
     path: "/about",

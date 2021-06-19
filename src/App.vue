@@ -4,12 +4,9 @@ import { defineComponent } from "vue";
 import { useQueryProvider } from "vue-query";
 import { VueQueryDevTools } from "vue-query/devtools";
 
-import Posts from "./Posts.vue";
-import Post from "./Post.vue";
-
 export default defineComponent({
   name: "App",
-  components: { Posts, Post, VueQueryDevTools },
+  components: { VueQueryDevTools },
   setup() {
     useQueryProvider();
 
@@ -39,13 +36,6 @@ export default defineComponent({
     </div>
     <router-view></router-view>
   </div>
-  <!-- <Post
-    v-if="postId > -1"
-    :postId="postId"
-    :style="{}"
-    @setPostId="setPostId"
-  />
-  <Posts v-else :isVisited="isVisited" @setPostId="setPostId" /> -->
   <VueQueryDevTools :initialIsOpen="true" />
 </template>
 

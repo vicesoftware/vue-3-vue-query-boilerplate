@@ -1,10 +1,7 @@
 <script>
 import { defineComponent } from "vue";
 import { useQuery } from "vue-query";
-import api from "./api";
-
-const fetcher = async (id) =>
-  await api.get(`posts/${id}`);
+import { getPosts } from "./data";
 
 export default defineComponent({
   name: "Post",
@@ -18,7 +15,7 @@ export default defineComponent({
   setup(props) {
     const { isLoading, isError, isFetching, data, error } = useQuery(
       ["post", props.postId],
-      () => fetcher(props.postId)
+      () => getPosts(props.postId)
     );
 
     return { isLoading, isError, isFetching, data, error };

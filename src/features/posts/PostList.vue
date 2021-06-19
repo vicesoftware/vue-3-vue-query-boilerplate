@@ -1,26 +1,15 @@
 <script>
 import { defineComponent } from "vue";
 import { useQuery } from "vue-query";
-import api from "./api";
-
-const fetcher = async () => {
-  return await api.get("posts")
-    .catch(e => console.log("Error fetching posts", e));
-}
+import { getPosts } from "./data";
 
 export default defineComponent({
   name: "Posts",
-  // props: {
-  //   isVisited: {
-  //     type: Function,
-  //     required: true,
-  //   },
-  // },
   emits: ["setPostId"],
   setup() {
     const { isLoading, isError, isFetching, data, error, refetch } = useQuery(
       "posts",
-      fetcher
+      () => getPosts()
     );
 
     return { isLoading, isError, isFetching, data, error, refetch };
