@@ -1,11 +1,10 @@
 <script>
 import { defineComponent } from "vue";
 import { useQuery } from "vue-query";
-import { getPosts } from "./data";
+import { getPosts } from "./posts.data";
 
 export default defineComponent({
-  name: "Posts",
-  emits: ["setPostId"],
+  name: "PostsList",
   setup() {
     const { isLoading, isError, isFetching, data, error, refetch } = useQuery(
       "posts",

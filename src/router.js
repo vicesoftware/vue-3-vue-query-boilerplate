@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { PostList, PostDetails} from "./features/posts";
+import { UserList, UserDetails } from "./features/users";
 import { About } from "./features/about";
 
 const routerHistory = createWebHistory();
@@ -24,6 +25,21 @@ const routes = [
     path: "/about",
     name: "About",
     component: About
+  },
+  {
+    path: "/users",
+    name: "Users",
+    component: UserList
+  },
+  {
+    path: "/users-list/:id",
+    name: "UserList",
+    props: (route) => {
+      return {
+        userId: route.params.id
+      };
+    },
+    component: UserDetails
   }
 ];
 

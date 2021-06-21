@@ -32,6 +32,7 @@ export default defineComponent({
   <div class="app">
     <div class="nav">
       <router-link to="/">Posts</router-link>
+      <router-link to="/users">Users</router-link>
       <router-link to="/about">About</router-link>
     </div>
     <router-view></router-view>

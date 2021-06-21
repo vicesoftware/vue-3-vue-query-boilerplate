@@ -1,20 +1,20 @@
 <script>
 import { defineComponent } from "vue";
 import { useQuery } from "vue-query";
-import { getPosts } from "./posts.data";
+import { getUsers } from "./users.data";
 
 export default defineComponent({
-  name: "PostDetails",
+  name: "UserDetails",
   props: {
-    postId: {
+    userId: {
       type: Number,
       required: true,
     },
   },
   setup(props) {
     const { isLoading, isError, isFetching, data, error } = useQuery(
-      ["post", props.postId],
-      () => getPosts(props.postId)
+      ["user", props.userId],
+      () => getUsers(props.userId)
     );
 
     return { isLoading, isError, isFetching, data, error };
@@ -23,17 +23,17 @@ export default defineComponent({
 </script>
 
 <template>
-  <h1>Post {{ postId }}</h1>
+  <h1>User {{ userId }}</h1>
   <router-link
-            :to="{ name: 'Posts'}"
+            :to="{ name: 'Users'}"
             >Back</router-link
           >
   <div v-if="isLoading" class="update">Loading...</div>
   <div v-else-if="isError">An error has occurred: {{ error }}</div>
   <div v-else-if="data">
-    <h1>{{ data.title }}</h1>
+    <h1>{{ data.username }}</h1>
     <div>
-      <p>{{ data.body }}</p>
+      <p>{{ data.name }}</p>
     </div>
     <div v-if="isFetching" class="update">Background Updating...</div>
   </div>
