@@ -14,7 +14,7 @@ export default defineComponent({
   setup(props) {
     const { isLoading, isError, isFetching, data, error } = useQuery(
       ["post", props.postId],
-      () => getPosts(props.postId)
+      () => getPosts({ id: props.postId})
     );
 
     return { isLoading, isError, isFetching, data, error };

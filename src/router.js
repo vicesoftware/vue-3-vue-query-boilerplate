@@ -12,6 +12,11 @@ const routes = [
     component: PostList
   },
   {
+    path: "/posts",
+    name: "Posts",
+    component: PostList
+  },
+  {
     path: "/posts/:id",
     name: "Post",
     props: (route) => {

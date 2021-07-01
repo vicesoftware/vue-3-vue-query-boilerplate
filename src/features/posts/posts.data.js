@@ -1,10 +1,16 @@
-import api from "../../infrastructure/api";
+import api from "/src/infrastructure/api.js";
 
-export const getPosts = async (id) => {
-    if (id) {
-      return await api.get(`posts/${id}`);
-    }
+export const getPosts = async ({id, userid} = {}) => {
+  let url = 'posts'
 
-    return await api.get("posts")
-      .catch(e => console.log("Error fetching posts", e));
+  if (id) {
+    url =  url + `/${id}`;
+  } 
+
+  if (userid) {
+      url = url + `?userId=${userid}`;
+  }
+
+  return await api.get(url)
+    .catch(e => console.log("Error fetching posts", e));
 }

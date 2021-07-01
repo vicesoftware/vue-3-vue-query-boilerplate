@@ -1,59 +1,89 @@
 <script>
-import { defineComponent } from "vue";
-import VueSelect from "vue-select";
-import { useQuery } from "vue-query";
+import { defineComponent, reactive, toRefs, watch, computed } from "vue";
+import { useQuery, useQueryClient } from "vue-query";
+import { useRouter } from "vue-router";
 import { getPosts } from "./posts.data";
 import { getUsers } from "../users";
 
 export default defineComponent({
   name: "PostsList",
-  async created() {
-    return await this.loadData();
-  },
-  data() {
-    return {
+  setup() {
+    const router = useRouter();
+
+    const data = reactive({
+      router: {},
       dataRequested: false,
       postsQuery: {},
       usersQuery: {},
-      selectedUser: {}
-    }
-  },
-  computed: {
-    isLoading() {
-      return !this.dataRequested || (this.postsQuery.isLoading || this.usersQuery.isLoading);
-    },
-    isError() {
-      return this.postsQuery.isError || this.usersQuery.isError;
-    },
-    error() {
-      return this.isError ? (this.postQuery.error || this.usersQuery.error) : "";
-    },
-    hasData() {
-      return !!this.postsQuery.data && !!this.usersQuery.data;
-    },
-    posts() {
-      return this.postsQuery && this.postsQuery.data;
-    },
-    users() {
-      return this.usersQuery && this.usersQuery.data;
-    }
-  },
-  methods: {
-    async loadData() {
-      const [postsQuery, usersQuery] =  await Promise.all([
-        useQuery(
-          "posts",
-          () => getPosts()
-        ), useQuery(
-          "users",
-          () => getUsers()
-        )]);
+      isLoading: computed(
+        () => !data.dataRequested || (data.postsQuery.isLoading || data.usersQuery.isLoading)
+      ),
+      isError: computed(
+        () => data.postsQuery.isError || data.usersQuery.isError
+      ),
+      error: computed(
+         () => data.isError ? (data?.postsQuery.error || data?.usersQuery.error) : ""
+      ),
+      hasData: computed( 
+        () => !!data.postsQuery.data && !!data.usersQuery.data
+      ),
+      posts: computed(
+        () => data.postsQuery && data.postsQuery.data
+      ),
+      users: computed( 
+        () => data.usersQuery && data.usersQuery.data
+      ), 
+      selectedUser: computed(
+        () => router?.currentRoute?.value?.query?.username
+      )
+    });
 
-      this.dataRequested = true;
+    const queryClient = useQueryClient();
 
-      this.postsQuery = postsQuery;
-      this.usersQuery = usersQuery;
+    const loadData = async () => {
+      const postsCacheKey = ['posts'];
+      let selectedUser;
+
+      if (data.selectedUser) {        
+        const users = queryClient.getQueryData("users");
+
+        if (!users) { // we have a selected users but no users in cache
+          // do a dependent query
+          return;
+        }
+
+        console.log(users);
+        selectedUser = users.find(user => user.username === data.selectedUser);
+        console.log(selectedUser);
+        postsCacheKey.push(`userid=${selectedUser.id}`);
+      } 
+
+      const postsQuery = useQuery(
+        postsCacheKey,
+        () => getPosts({userid: selectedUser?.id})
+      );
+
+      const usersQuery = useQuery(
+        "users",
+        () => getUsers()
+      );
+
+      const [postsQueryResponse, usersQueryResponse] =  await Promise.all([
+        postsQuery, usersQuery]);
+
+      data.dataRequested = true;
+
+      data.postsQuery = postsQueryResponse;
+      data.usersQuery = usersQueryResponse;
     }
+
+    const changeItem = ($event) => {
+      router.push({ name: 'Posts', query: { username: $event.target.value }});
+    }
+
+    watch(router.currentRoute, loadData, { immediate: true })
+
+    return { ...toRefs(data), changeItem };
   }
 });
 </script>
@@ -73,10 +103,9 @@ export default defineComponent({
   <div v-if="isLoading">Loading...</div>
   <div v-else-if="isError">An error has occurred: {{ error }}</div>
   <div v-else-if="hasData">
-    <div>hi</div>
-    <select v-model="selectedUser">
-      <option disabled>Select a user...</option>
-      <option v-bind:key="user.id" v-for="user in users" :value="user.id" :label="user.name">
+    <select v-on:change="changeItem">
+      <option disabled value="" selected>Select a user...</option>
+      <option v-bind:key="user.id" v-for="user in users" :value="user.username" :label="user.name">
       </option>
     </select>   
     <ul>

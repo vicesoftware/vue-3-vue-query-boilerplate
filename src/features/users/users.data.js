@@ -1,8 +1,14 @@
 import api from "../../infrastructure/api";
 
-export const getUsers = async (id) => {
+export const getUsers = async ({id, username} = {}) => {
+    let url = 'users'
+
     if (id) {
-      return await api.get(`users/${id}`);
+      url =  url + `/${id}`;
+    } 
+
+    if (username) {
+      url = url + `?username=${this.selectedUser}`;
     }
 
     return await api.get("users")
