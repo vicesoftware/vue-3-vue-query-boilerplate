@@ -1,6 +1,6 @@
 <script>
-import { defineComponent, reactive, toRefs, watch, computed } from "vue";
-import { useQuery, useQueryClient } from "vue-query";
+import { defineComponent, toRefs, watch, computed, reactive } from "vue";
+import { useQuery } from "vue-query";
 import { useRouter } from "vue-router";
 import { getPosts } from "./posts.data";
 import { getUsers } from "../users";
@@ -8,80 +8,61 @@ import { getUsers } from "../users";
 export default defineComponent({
   name: "PostsList",
   setup() {
+    // See details about ref and reactive here: https://www.thisdot.co/blog/vue-3-composition-api-ref-and-reactive
     const router = useRouter();
 
     const data = reactive({
-      router: {},
-      dataRequested: false,
-      postsQuery: {},
-      usersQuery: {},
+      postsKey: ['posts'],
+      selectedUserId: undefined,
       isLoading: computed(
-        () => !data.dataRequested || (data.postsQuery.isLoading || data.usersQuery.isLoading)
+        () => postsQuery.isLoading || usersQuery.isLoading
       ),
       isError: computed(
-        () => data.postsQuery.isError || data.usersQuery.isError
+        () => postsQuery.isError || usersQuery.isError
       ),
       error: computed(
-         () => data.isError ? (data?.postsQuery.error || data?.usersQuery.error) : ""
+         () => data.isError ? (postsQuery.error || usersQuery.error) : ""
       ),
       hasData: computed( 
-        () => !!data.postsQuery.data && !!data.usersQuery.data
+        () => !!postsQuery.data && !!usersQuery.data
       ),
       posts: computed(
-        () => data.postsQuery && data.postsQuery.data
+        () => postsQuery && postsQuery.data
       ),
       users: computed( 
-        () => data.usersQuery && data.usersQuery.data
+        () => usersQuery && usersQuery.data
       ), 
       selectedUser: computed(
         () => router?.currentRoute?.value?.query?.username
       )
     });
 
-    const queryClient = useQueryClient();
+    // const postsKey = reactive();
+    // const selectedUserId = ref(undefined);
 
-    const loadData = async () => {
-      const postsCacheKey = ['posts'];
-      let selectedUser;
+    // const usersQuery = reactive(useQuery("users", () => getUsers()));
+    // const postsQuery = reactive(useQuery(postsKey ,() => 
+    //   getPosts({userid: selectedUserId.value})
+    // ));
 
-      if (data.selectedUser) {        
-        const users = queryClient.getQueryData("users");
+    const usersQuery = reactive(useQuery("users", () => getUsers()));
+    const postsQuery = reactive(useQuery(data.postsKey ,() => 
+      getPosts({userid: data.selectedUserId})
+    ));
 
-        if (!users) { // we have a selected users but no users in cache
-          // do a dependent query
-          return;
-        }
-
-        console.log(users);
-        selectedUser = users.find(user => user.username === data.selectedUser);
-        console.log(selectedUser);
-        postsCacheKey.push(`userid=${selectedUser.id}`);
-      } 
-
-      const postsQuery = useQuery(
-        postsCacheKey,
-        () => getPosts({userid: selectedUser?.id})
-      );
-
-      const usersQuery = useQuery(
-        "users",
-        () => getUsers()
-      );
-
-      const [postsQueryResponse, usersQueryResponse] =  await Promise.all([
-        postsQuery, usersQuery]);
-
-      data.dataRequested = true;
-
-      data.postsQuery = postsQueryResponse;
-      data.usersQuery = usersQueryResponse;
+    const loadData = () => {
+       if (data.selectedUser && data.users) {
+        data.selectedUserId = data.users.find(user => user.username === data.selectedUser).id;
+        const userQuery = `userId=${data.selectedUserId}`;
+        set(postsKey, 1, userQuery)
+      }
     }
 
     const changeItem = ($event) => {
       router.push({ name: 'Posts', query: { username: $event.target.value }});
     }
 
-    watch(router.currentRoute, loadData, { immediate: true })
+    watch(router.currentRoute, loadData, { immediate:true })
 
     return { ...toRefs(data), changeItem };
   }
