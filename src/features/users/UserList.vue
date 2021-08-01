@@ -1,34 +1,40 @@
 <script>
-import { defineComponent } from "vue";
+import { defineComponent, toRefs, reactive, ref } from "vue";
 import { useQuery } from "vue-query";
 import { getUsers } from "./users.data";
+// import { UserDetails } from "./UserDetails.vue";
 
 export default defineComponent({
   name: "UsersList",
   setup() {
-    const { isLoading, isError, isFetching, data, error, refetch } = useQuery(
+    const state = reactive({
+      selectedUserId: 0,
+      userQuery: null
+    })
+    state.userQuery = ref(useQuery(
       "users",
       () => getUsers()
-    );
+    ));
 
-    return { isLoading, isError, isFetching, data, error, refetch };
+    console.log(state.userQuery);
+
+    return { ...toRefs(state)  };
   },
 });
 </script>
 
 <template>
   <h1>Users</h1>
-  <div v-if="isLoading">Loading...</div>
-  <div v-else-if="isError">An error has occurred: {{ error }}</div>
-  <div v-else-if="data">
-    <ul>
-      <li v-for="item in data" :key="item.id">
-        <router-link
-            :to="{ name: 'UserList', params: { id: item.id } }"
-            >{{item.username}}</router-link
-          >
-      </li>
-    </ul>
+  <div>Selected User Id: {{selectedUserId}}</div>
+  <div v-if="userQuery?.isLoading">Loading...</div>
+  <!-- <div v-else-if="userQuery?.isError">An error has occurred: {{ userQuery?.error }}</div> -->
+  <div v-else-if="userQuery?.data">
+    <select v-model="selectedUserId">
+      <option disabled value="0">Select user</option>
+      <option v-for="item in userQuery.data" :value="item.id" :key="item.id">
+        {{ item.username }}
+      </option>
+    </select>
   </div>
 </template>
 
